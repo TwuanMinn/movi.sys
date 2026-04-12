@@ -1,26 +1,432 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* ══════════════════════════════════════════════
+     CINEFORGE — Cinema Noir Industrial Design System
+     @frontend-specialist: Sharp edges, warm darks,
+     no purple, no glassmorphism, no bento traps
+     ══════════════════════════════════════════════ */
+
+  /* Background Hierarchy — warm charcoal, not cold gray */
+  --color-bg-primary: oklch(0.14 0.008 65);
+  --color-bg-surface: oklch(0.18 0.008 65);
+  --color-bg-elevated: oklch(0.22 0.008 65);
+  --color-bg-hover: oklch(0.26 0.01 65);
+  --color-bg-active: oklch(0.30 0.01 65);
+
+  /* Accent — Amber/Red cinema palette (NO purple, NO cyan) */
+  --color-accent-primary: oklch(0.65 0.18 30);
+  --color-accent-amber: oklch(0.72 0.16 75);
+  --color-accent-green: oklch(0.68 0.17 155);
+  --color-accent-blue: oklch(0.62 0.14 245);
+  --color-accent-danger: oklch(0.55 0.22 25);
+
+  /* Text — warm off-white hierarchy */
+  --color-text-primary: oklch(0.93 0.01 80);
+  --color-text-secondary: oklch(0.68 0.02 70);
+  --color-text-muted: oklch(0.48 0.015 65);
+  --color-text-inverse: oklch(0.14 0.008 65);
+
+  /* Borders — subtle warmth */
+  --color-border-default: oklch(0.26 0.01 65);
+  --color-border-subtle: oklch(0.20 0.008 65);
+  --color-border-accent: oklch(0.65 0.18 30);
+
+  /* Typography */
+  --font-display: "Cormorant Garamond", serif;
+  --font-body: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Spacing — 8pt grid */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  /* Shadows — warm tinted, multi-layered depth */
+  --shadow-sm: 0 1px 2px oklch(0.08 0.01 65 / 0.6);
+  --shadow-md: 0 2px 8px oklch(0.06 0.01 65 / 0.5),
+    0 1px 2px oklch(0.08 0.01 65 / 0.3);
+  --shadow-lg: 0 8px 24px oklch(0.04 0.01 65 / 0.5),
+    0 2px 8px oklch(0.06 0.01 65 / 0.3);
+  --shadow-glow: 0 0 20px oklch(0.65 0.18 30 / 0.15);
+
+  /* Transitions */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ═══════════════════════════════════════
+   Base Resets
+   ═══════════════════════════════════════ */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: dark;
+  /* Fluid base size: 16px @ 1024px → 20px @ 2560px+ 
+     This scales ALL rem-based Tailwind sizes on large/HiDPI displays */
+  font-size: clamp(16px, calc(14px + 0.25vw), 22px);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══════════════════════════════════════
+   Scrollbar — thin, unobtrusive
+   ═══════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-default);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ═══════════════════════════════════════
+   Selection
+   ═══════════════════════════════════════ */
+
+::selection {
+  background-color: oklch(0.65 0.18 30 / 0.3);
+  color: var(--color-text-primary);
+}
+
+/* ═══════════════════════════════════════
+   Focus Ring — accessibility
+   ═══════════════════════════════════════ */
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════
+   Reduced Motion
+   @performance-optimizer: mandatory a11y
+   ═══════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ═══════════════════════════════════════
+   Utility Classes
+   ═══════════════════════════════════════ */
+
+.film-grain {
+  position: relative;
+}
+
+.film-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 128px;
+  mix-blend-mode: overlay;
+}
+
+/* ═══════════════════════════════════════
+   Micro-Interactions — Buttons
+   ═══════════════════════════════════════ */
+
+button,
+[role="button"] {
+  transition:
+    transform var(--duration-fast) var(--ease-spring),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    background-color var(--duration-fast) var(--ease-smooth),
+    border-color var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) var(--ease-smooth),
+    opacity var(--duration-fast) var(--ease-smooth);
+}
+
+button:active:not(:disabled),
+[role="button"]:active:not(:disabled) {
+  transform: scale(0.965);
+}
+
+/* Primary action buttons — inline styled S.btnP */
+.btn-primary,
+button[style*="D4534B"],
+button[style*="accent-primary"] {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after,
+button[style*="D4534B"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.btn-primary:hover::after,
+button[style*="D4534B"]:hover::after {
+  transform: translateX(100%);
+}
+
+/* ═══════════════════════════════════════
+   Micro-Interactions — Inputs
+   ═══════════════════════════════════════ */
+
+input,
+textarea,
+select {
+  transition:
+    border-color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    background-color var(--duration-fast) var(--ease-smooth) !important;
+}
+
+input:focus,
+textarea:focus {
+  box-shadow: 0 0 0 3px oklch(0.65 0.18 30 / 0.08),
+    0 0 12px oklch(0.65 0.18 30 / 0.05);
+}
+
+/* ═══════════════════════════════════════
+   Micro-Interactions — Cards
+   ═══════════════════════════════════════ */
+
+.card-hover {
+  transition:
+    transform var(--duration-normal) var(--ease-spring),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth);
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: oklch(0.65 0.18 30 / 0.12);
+}
+
+/* ═══════════════════════════════════════
+   Keyframe Animations
+   ═══════════════════════════════════════ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.65 0.18 30 / 0.15);
+  }
+  50% {
+    box-shadow: 0 0 12px 4px oklch(0.65 0.18 30 / 0.08);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes badgePop {
+  0% {
+    transform: scale(0);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes gentleBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes spinOnce {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ═══════════════════════════════════════
+   Utility Animation Classes
+   ═══════════════════════════════════════ */
+
+.anim-fade-in-up {
+  animation: fadeInUp 0.4s var(--ease-smooth) forwards;
+}
+
+.anim-fade-in-scale {
+  animation: fadeInScale 0.35s var(--ease-smooth) forwards;
+}
+
+.anim-pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+.anim-badge-pop {
+  animation: badgePop 0.35s var(--ease-spring) forwards;
+}
+
+.anim-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 30%,
+    oklch(0.93 0.01 80 / 0.04) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Stagger delay helper — apply with nth-child */
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 300ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 350ms; }
+.stagger-children > *:nth-child(9) { animation-delay: 400ms; }
+
+/* ═══════════════════════════════════════
+   Interactive Sidebar Icons
+   ═══════════════════════════════════════ */
+
+nav a:hover .nav-icon {
+  animation: gentleBounce 0.4s var(--ease-spring);
+}
+
+/* Notification badge enter */
+.notif-badge {
+  animation: badgePop 0.35s var(--ease-spring) forwards;
+}
+
+/* ═══════════════════════════════════════
+   Toggle switch — shared across settings
+   ═══════════════════════════════════════ */
+
+.toggle-track {
+  transition:
+    background-color var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth);
+}
+
+.toggle-track.active {
+  box-shadow: 0 0 8px oklch(0.65 0.18 30 / 0.2);
+}
+
+.toggle-knob {
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+
+/* ═══════════════════════════════════════
+   Tooltip & Popover transitions
+   ═══════════════════════════════════════ */
+
+.tooltip-enter {
+  animation: fadeInScale 0.2s var(--ease-smooth) forwards;
+  transform-origin: bottom center;
+}
+
+/* ═══════════════════════════════════════
+   Status badge shimmer on hover
+   ═══════════════════════════════════════ */
+
+[style*="borderRadius: 20"]:hover,
+.status-badge:hover {
+  filter: brightness(1.15);
+  transition: filter var(--duration-fast) var(--ease-smooth);
+}
+
+/* ═══════════════════════════════════════
+   Scrollbar fade-in on hover (containers)
+   ═══════════════════════════════════════ */
+
+.scroll-fade {
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color var(--duration-slow) var(--ease-smooth);
+}
+
+.scroll-fade:hover {
+  scrollbar-color: var(--color-border-default) transparent;
 }
