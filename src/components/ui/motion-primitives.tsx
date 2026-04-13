@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
 /* ═══════════════════════════════════════════════════════════════
    #7 — AnimatedCounter: Smooth count-up for KPI values
@@ -27,9 +27,11 @@ export function AnimatedCounter({
 
   useEffect(() => {
     if (!match || !ref.current || hasAnimated.current) return;
+    const numericPart = match[1];
+    if (!numericPart) return;
     hasAnimated.current = true;
 
-    const target = parseFloat(match[1]);
+    const target = parseFloat(numericPart);
     const isFloat = !Number.isInteger(target);
     const beforeNum = str.slice(0, match.index);
     const afterNum = str.slice((match.index ?? 0) + match[0].length);
@@ -118,7 +120,7 @@ export function RippleButton({
             width: r.size,
             height: r.size,
             borderRadius: "50%",
-            background: "rgba(214,198,170,0.12)",
+            background: "rgba(173,198,255,0.12)",
             pointerEvents: "none",
           }}
         />
@@ -147,7 +149,7 @@ export function SkeletonBlock({
         width,
         height,
         borderRadius: radius,
-        background: "rgba(214,198,170,0.04)",
+        background: "rgba(173,198,255,0.04)",
       }}
     />
   );
@@ -155,7 +157,7 @@ export function SkeletonBlock({
 
 export function SkeletonCard() {
   return (
-    <div style={{ padding: 20, borderRadius: 12, border: "1px solid rgba(214,198,170,0.05)", background: "rgba(28,25,21,0.9)", display: "flex", flexDirection: "column", gap: 12 }}>
+    <div style={{ padding: 20, borderRadius: 12, border: "1px solid rgba(173,198,255,0.05)", background: "rgba(25,28,34,0.9)", display: "flex", flexDirection: "column", gap: 12 }}>
       <SkeletonBlock width="40%" height={14} />
       <SkeletonBlock height={32} />
       <SkeletonBlock width="60%" height={12} />
@@ -168,110 +170,117 @@ export function SkeletonCard() {
    Each page can import its own unique entrance orchestration.
    ═══════════════════════════════════════════════════════════════ */
 
+const STANDARD_EASE = [0.4, 0, 0.2, 1] as const;
+
+type PageVariantGroup = {
+  container: Variants;
+  item: Variants;
+};
+
+const dashboardVariants: PageVariantGroup = {
+  container: {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.06, delayChildren: 0.1 },
+    },
+  },
+  item: {
+    hidden: { opacity: 0, y: 18, scale: 0.97 },
+    show: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 },
+    },
+  },
+};
+
+const analyticsVariants: PageVariantGroup = {
+  container: {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.08, delayChildren: 0.05 },
+    },
+  },
+  item: {
+    hidden: { opacity: 0, x: -20 },
+    show: {
+      opacity: 1,
+      x: 0,
+      transition: { type: "spring", stiffness: 260, damping: 20 },
+    },
+  },
+};
+
+const reportsVariants: PageVariantGroup = {
+  container: {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.07, delayChildren: 0.08 },
+    },
+  },
+  item: {
+    hidden: { opacity: 0, y: -15, scale: 0.98 },
+    show: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { type: "spring", stiffness: 280, damping: 22 },
+    },
+  },
+};
+
+const calendarVariants: PageVariantGroup = {
+  container: {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.04, delayChildren: 0.1 },
+    },
+  },
+  item: {
+    hidden: { opacity: 0, x: -30 },
+    show: {
+      opacity: 1,
+      x: 0,
+      transition: { type: "spring", stiffness: 200, damping: 18 },
+    },
+  },
+};
+
+const promotionVariants: PageVariantGroup = {
+  container: {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.05, delayChildren: 0.08 },
+    },
+  },
+  item: {
+    hidden: { opacity: 0, x: -14, y: 10 },
+    show: {
+      opacity: 1,
+      x: 0,
+      y: 0,
+      transition: { type: "spring", stiffness: 300, damping: 22 },
+    },
+  },
+};
+
 export const pageVariants = {
   // Default fade+slide (used by layout)
   default: {
     initial: { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -10 },
-    transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] },
+    transition: { duration: 0.25, ease: STANDARD_EASE },
   },
-
-  // Dashboard — gentle scale up
-  dashboard: {
-    container: {
-      hidden: { opacity: 0 },
-      show: {
-        opacity: 1,
-        transition: { staggerChildren: 0.06, delayChildren: 0.1 },
-      },
-    },
-    item: {
-      hidden: { opacity: 0, y: 18, scale: 0.97 },
-      show: {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        transition: { type: "spring", stiffness: 300, damping: 24 },
-      },
-    },
-  },
-
-  // Analytics — cards draw in from sides
-  analytics: {
-    container: {
-      hidden: { opacity: 0 },
-      show: {
-        opacity: 1,
-        transition: { staggerChildren: 0.08, delayChildren: 0.05 },
-      },
-    },
-    item: {
-      hidden: { opacity: 0, x: -20 },
-      show: {
-        opacity: 1,
-        x: 0,
-        transition: { type: "spring", stiffness: 260, damping: 20 },
-      },
-    },
-  },
-
-  // Reports — cascade from top
-  reports: {
-    container: {
-      hidden: { opacity: 0 },
-      show: {
-        opacity: 1,
-        transition: { staggerChildren: 0.07, delayChildren: 0.08 },
-      },
-    },
-    item: {
-      hidden: { opacity: 0, y: -15, scale: 0.98 },
-      show: {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        transition: { type: "spring", stiffness: 280, damping: 22 },
-      },
-    },
-  },
-
-  // Calendar — slide from left
-  calendar: {
-    container: {
-      hidden: { opacity: 0 },
-      show: {
-        opacity: 1,
-        transition: { staggerChildren: 0.04, delayChildren: 0.1 },
-      },
-    },
-    item: {
-      hidden: { opacity: 0, x: -30 },
-      show: {
-        opacity: 1,
-        x: 0,
-        transition: { type: "spring", stiffness: 200, damping: 18 },
-      },
-    },
-  },
-
-  // Promotion — stagger from bottom-left
-  promotion: {
-    container: {
-      hidden: { opacity: 0 },
-      show: {
-        opacity: 1,
-        transition: { staggerChildren: 0.05, delayChildren: 0.08 },
-      },
-    },
-    item: {
-      hidden: { opacity: 0, x: -14, y: 10 },
-      show: {
-        opacity: 1,
-        x: 0,
-        y: 0,
-        transition: { type: "spring", stiffness: 300, damping: 22 },
-      },
-    },
-  },
+  dashboard: dashboardVariants,
+  analytics: analyticsVariants,
+  reports: reportsVariants,
+  calendar: calendarVariants,
+  promotion: promotionVariants,
 };

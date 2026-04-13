@@ -60,8 +60,8 @@ export function Header() {
             placeholder="Search films, people..."
             className="h-8 w-44 lg:w-56 focus:w-64 lg:focus:w-72 rounded-[var(--radius-sm)] border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-3 pl-8 text-xs text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-accent-primary)]/50 focus:outline-none transition-all duration-300 ease-[var(--ease-smooth)]"
           />
-          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-[var(--color-text-muted)] transition-transform duration-200 group-focus-within:scale-110">
-            ⌕
+          <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[16px] text-[var(--color-text-muted)] transition-transform duration-200 group-focus-within:scale-110">
+            search
           </span>
         </div>
 
@@ -73,7 +73,7 @@ export function Header() {
           className="relative flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)]"
           aria-label="Notifications"
         >
-          <span>◉</span>
+          <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>notifications</span>
           {notificationCount > 0 && (
             <motion.span
               initial={{ scale: 0 }}
@@ -84,6 +84,17 @@ export function Header() {
               {notificationCount}
             </motion.span>
           )}
+        </motion.button>
+
+        {/* Settings */}
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
+          transition={{ type: "spring", stiffness: 400, damping: 15 }}
+          className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)]"
+          aria-label="Settings"
+        >
+          <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>settings</span>
         </motion.button>
       </div>
     </header>

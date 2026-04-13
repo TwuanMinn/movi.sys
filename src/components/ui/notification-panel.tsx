@@ -8,6 +8,7 @@ interface Props {
 
 export function NotificationPanel({ open, onClose, activities }: Props) {
   if (!open) return null;
+  void activities;
 
   const notifications = [
     { id: 1, type: "warning", title: "Budget Alert", desc: "Whispers in the Dark is at 91% budget utilization", time: "10m ago", read: false },
@@ -29,7 +30,7 @@ export function NotificationPanel({ open, onClose, activities }: Props) {
 
   const typeColor: Record<string, string> = {
     warning: "#D4903B",
-    approval: "#3BA55C",
+    approval: "#82dab0",
     milestone: "#D4534B",
     update: "#4A90D9",
     team: "#8E5BB5",
@@ -45,21 +46,21 @@ export function NotificationPanel({ open, onClose, activities }: Props) {
       {/* Panel */}
       <div style={{
         position: "fixed", top: 60, right: 24, width: 380, maxWidth: "calc(100vw - 48px)", maxHeight: "calc(100vh - 100px)",
-        background: "rgba(18,15,12,0.98)", border: "1px solid rgba(214,198,170,0.12)", borderRadius: 14,
+        background: "rgba(18,15,12,0.98)", border: "1px solid rgba(173,198,255,0.12)", borderRadius: 14,
         boxShadow: "0 16px 64px rgba(0,0,0,0.6)", zIndex: 999, overflow: "hidden",
         animation: "slideUp .25s ease",
       }}>
         {/* Header */}
-        <div style={{ padding: "16px 18px", borderBottom: "1px solid rgba(214,198,170,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ padding: "16px 18px", borderBottom: "1px solid rgba(173,198,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ color: "#D6C6AA", fontSize: 16, fontFamily: "var(--font-display, 'Cormorant Garamond', serif)", fontWeight: 600 }}>Notifications</span>
+            <span style={{ color: "#e1e2eb", fontSize: 16, fontFamily: "var(--font-display, 'Manrope', serif)", fontWeight: 600 }}>Notifications</span>
             {unread > 0 && (
               <span style={{ background: "rgba(212,83,75,0.2)", color: "#D4534B", fontSize: 11, padding: "2px 8px", borderRadius: 12, fontWeight: 600 }}>{unread} new</span>
             )}
           </div>
           <div style={{ display: "flex", gap: 6 }}>
-            <button style={{ background: "transparent", border: "none", color: "#5A5347", cursor: "pointer", fontSize: 12, fontFamily: "inherit", padding: "4px 8px" }}>Mark all read</button>
-            <button onClick={onClose} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(214,198,170,0.08)", color: "#7A7062", borderRadius: 6, width: 26, height: 26, cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+            <button style={{ background: "transparent", border: "none", color: "#414755", cursor: "pointer", fontSize: 12, fontFamily: "inherit", padding: "4px 8px" }}>Mark all read</button>
+            <button onClick={onClose} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(173,198,255,0.08)", color: "#8b90a0", borderRadius: 6, width: 26, height: 26, cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
           </div>
         </div>
 
@@ -75,10 +76,10 @@ export function NotificationPanel({ open, onClose, activities }: Props) {
               <span style={{ fontSize: 16, marginTop: 1 }}>{typeIcon[n.type]}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
-                  <span style={{ color: n.read ? "#7A7062" : "#D6C6AA", fontSize: 13, fontWeight: n.read ? 400 : 600 }}>{n.title}</span>
+                  <span style={{ color: n.read ? "#8b90a0" : "#e1e2eb", fontSize: 13, fontWeight: n.read ? 400 : 600 }}>{n.title}</span>
                   <span style={{ color: "#3A362F", fontSize: 10, flexShrink: 0, marginLeft: 8 }}>{n.time}</span>
                 </div>
-                <div style={{ color: "#5A5347", fontSize: 12, lineHeight: 1.5 }}>{n.desc}</div>
+                <div style={{ color: "#414755", fontSize: 12, lineHeight: 1.5 }}>{n.desc}</div>
               </div>
               {!n.read && <div style={{ width: 7, height: 7, borderRadius: "50%", background: typeColor[n.type], flexShrink: 0, marginTop: 6 }} />}
             </div>
@@ -86,8 +87,8 @@ export function NotificationPanel({ open, onClose, activities }: Props) {
         </div>
 
         {/* Footer */}
-        <div style={{ padding: "12px 18px", borderTop: "1px solid rgba(214,198,170,0.06)", textAlign: "center" }}>
-          <span style={{ color: "#5A5347", fontSize: 12, cursor: "pointer" }}>View all notifications →</span>
+        <div style={{ padding: "12px 18px", borderTop: "1px solid rgba(173,198,255,0.06)", textAlign: "center" }}>
+          <span style={{ color: "#414755", fontSize: 12, cursor: "pointer" }}>View all notifications →</span>
         </div>
       </div>
     </>

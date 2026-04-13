@@ -1,55 +1,57 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Manrope:wght@200;400;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap");
 @import "tailwindcss";
 
 @theme {
   /* ══════════════════════════════════════════════
-     CINEFORGE — Cinema Noir Industrial Design System
-     @frontend-specialist: Sharp edges, warm darks,
-     no purple, no glassmorphism, no bento traps
+     CINEFORGE — Nocturnal Suite Design System
+     @frontend-specialist: Stitch-derived palette,
+     cool blue-slate surfaces, azure accents
      ══════════════════════════════════════════════ */
 
-  /* Background Hierarchy — warm charcoal, not cold gray */
-  --color-bg-primary: oklch(0.14 0.008 65);
-  --color-bg-surface: oklch(0.18 0.008 65);
-  --color-bg-elevated: oklch(0.22 0.008 65);
-  --color-bg-hover: oklch(0.26 0.01 65);
-  --color-bg-active: oklch(0.30 0.01 65);
+  /* Background Hierarchy — cool blue-charcoal from Stitch M3 */
+  --color-bg-primary: #10131a;       /* surface / background */
+  --color-bg-surface: #191c22;       /* surface-container-low */
+  --color-bg-elevated: #1d2026;      /* surface-container */
+  --color-bg-hover: #272a31;         /* surface-container-high */
+  --color-bg-active: #32353c;        /* surface-container-highest */
 
-  /* Accent — Amber/Red cinema palette (NO purple, NO cyan) */
-  --color-accent-primary: oklch(0.65 0.18 30);
-  --color-accent-amber: oklch(0.72 0.16 75);
-  --color-accent-green: oklch(0.68 0.17 155);
-  --color-accent-blue: oklch(0.62 0.14 245);
-  --color-accent-danger: oklch(0.55 0.22 25);
+  /* Accent — Azure / Warm complement from Stitch */
+  --color-accent-primary: #adc6ff;   /* primary */
+  --color-accent-amber: #ffb595;     /* tertiary */
+  --color-accent-green: #82dab0;     /* success — kept */
+  --color-accent-blue: #4b8eff;      /* primary-container */
+  --color-accent-danger: #ffb4ab;    /* error */
 
-  /* Text — warm off-white hierarchy */
-  --color-text-primary: oklch(0.93 0.01 80);
-  --color-text-secondary: oklch(0.68 0.02 70);
-  --color-text-muted: oklch(0.48 0.015 65);
-  --color-text-inverse: oklch(0.14 0.008 65);
+  /* Text — cool off-white hierarchy */
+  --color-text-primary: #e1e2eb;     /* on-surface */
+  --color-text-secondary: #c1c6d7;   /* on-surface-variant */
+  --color-text-muted: #8b90a0;       /* outline */
+  --color-text-inverse: #10131a;     /* inverse bg */
 
-  /* Borders — subtle warmth */
-  --color-border-default: oklch(0.26 0.01 65);
-  --color-border-subtle: oklch(0.20 0.008 65);
-  --color-border-accent: oklch(0.65 0.18 30);
+  /* Borders — cool slate */
+  --color-border-default: #414755;   /* outline-variant */
+  --color-border-subtle: #272a31;    /* surface-container-high */
+  --color-border-accent: #adc6ff;    /* primary */
 
-  /* Typography */
-  --font-display: "Cormorant Garamond", serif;
-  --font-body: "Outfit", sans-serif;
+  /* Typography — Manrope headlines, Inter body */
+  --font-display: "Manrope", sans-serif;
+  --font-body: "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  /* Spacing — 8pt grid */
-  --radius-xs: 2px;
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
+  /* Spacing — Stitch M3 border radius tokens */
+  --radius-xs: 0.25rem;   /* 4px — Stitch default */
+  --radius-sm: 0.5rem;    /* 8px */
+  --radius-md: 1rem;      /* 16px — Stitch lg */
+  --radius-lg: 1.5rem;    /* 24px — Stitch xl */
 
-  /* Shadows — warm tinted, multi-layered depth */
-  --shadow-sm: 0 1px 2px oklch(0.08 0.01 65 / 0.6);
-  --shadow-md: 0 2px 8px oklch(0.06 0.01 65 / 0.5),
-    0 1px 2px oklch(0.08 0.01 65 / 0.3);
-  --shadow-lg: 0 8px 24px oklch(0.04 0.01 65 / 0.5),
-    0 2px 8px oklch(0.06 0.01 65 / 0.3);
-  --shadow-glow: 0 0 20px oklch(0.65 0.18 30 / 0.15);
+  /* Shadows — cool-tinted, multi-layered depth */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.35),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-glow: 0 0 20px rgba(173, 198, 255, 0.15);
 
   /* Transitions */
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -57,6 +59,67 @@
   --duration-fast: 150ms;
   --duration-normal: 250ms;
   --duration-slow: 400ms;
+}
+
+/* ═══════════════════════════════════════
+   LIGHT MODE — Premium Warm-White Theme
+   Applied via .light class on <html>
+   ═══════════════════════════════════════ */
+
+.light {
+  color-scheme: light;
+
+  /* Background Hierarchy — warm paper whites */
+  --color-bg-primary: #f7f8fc;
+  --color-bg-surface: #ffffff;
+  --color-bg-elevated: #eef0f5;
+  --color-bg-hover: #e4e7ee;
+  --color-bg-active: #d9dce5;
+
+  /* Accent — deeper for contrast on light surfaces */
+  --color-accent-primary: #3461b2;
+  --color-accent-amber: #c76d30;
+  --color-accent-green: #2a8a5a;
+  --color-accent-blue: #2a62d4;
+  --color-accent-danger: #c04040;
+
+  /* Text — dark ink hierarchy */
+  --color-text-primary: #1a1c24;
+  --color-text-secondary: #3e4250;
+  --color-text-muted: #6e7389;
+  --color-text-inverse: #f7f8fc;
+
+  /* Borders — soft grays */
+  --color-border-default: #cdd1dc;
+  --color-border-subtle: #e4e7ee;
+  --color-border-accent: #3461b2;
+
+  /* Shadows — softer, lighter */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-glow: 0 0 20px rgba(52, 97, 178, 0.1);
+}
+
+/* ═══════════════════════════════════════
+   Material Symbols Outlined
+   ═══════════════════════════════════════ */
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'liga';
 }
 
 /* ═══════════════════════════════════════
@@ -70,6 +133,10 @@ html {
   font-size: clamp(16px, calc(14px + 0.25vw), 22px);
 }
 
+html.light {
+  color-scheme: light;
+}
+
 body {
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
@@ -78,6 +145,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ═══════════════════════════════════════
@@ -107,7 +175,7 @@ body {
    ═══════════════════════════════════════ */
 
 ::selection {
-  background-color: oklch(0.65 0.18 30 / 0.3);
+  background-color: rgba(173, 198, 255, 0.3);
   color: var(--color-text-primary);
 }
 
@@ -175,16 +243,16 @@ button:active:not(:disabled),
   transform: scale(0.965);
 }
 
-/* Primary action buttons — inline styled S.btnP */
+/* Primary action buttons — Stitch azure accent */
 .btn-primary,
-button[style*="D4534B"],
+button[style*="adc6ff"],
 button[style*="accent-primary"] {
   position: relative;
   overflow: hidden;
 }
 
 .btn-primary::after,
-button[style*="D4534B"]::after {
+button[style*="adc6ff"]::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -199,7 +267,7 @@ button[style*="D4534B"]::after {
 }
 
 .btn-primary:hover::after,
-button[style*="D4534B"]:hover::after {
+button[style*="adc6ff"]:hover::after {
   transform: translateX(100%);
 }
 
@@ -218,8 +286,8 @@ select {
 
 input:focus,
 textarea:focus {
-  box-shadow: 0 0 0 3px oklch(0.65 0.18 30 / 0.08),
-    0 0 12px oklch(0.65 0.18 30 / 0.05);
+  box-shadow: 0 0 0 3px rgba(173, 198, 255, 0.1),
+    0 0 12px rgba(173, 198, 255, 0.06);
 }
 
 /* ═══════════════════════════════════════
@@ -236,7 +304,7 @@ textarea:focus {
 .card-hover:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
-  border-color: oklch(0.65 0.18 30 / 0.12);
+  border-color: rgba(173, 198, 255, 0.12);
 }
 
 /* ═══════════════════════════════════════
@@ -279,10 +347,10 @@ textarea:focus {
 @keyframes pulseGlow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 oklch(0.65 0.18 30 / 0.15);
+    box-shadow: 0 0 0 0 rgba(173, 198, 255, 0.15);
   }
   50% {
-    box-shadow: 0 0 12px 4px oklch(0.65 0.18 30 / 0.08);
+    box-shadow: 0 0 12px 4px rgba(173, 198, 255, 0.08);
   }
 }
 
@@ -350,7 +418,7 @@ textarea:focus {
   background: linear-gradient(
     90deg,
     transparent 30%,
-    oklch(0.93 0.01 80 / 0.04) 50%,
+    rgba(225, 226, 235, 0.04) 50%,
     transparent 70%
   );
   background-size: 200% 100%;
@@ -392,7 +460,7 @@ nav a:hover .nav-icon {
 }
 
 .toggle-track.active {
-  box-shadow: 0 0 8px oklch(0.65 0.18 30 / 0.2);
+  box-shadow: 0 0 8px rgba(173, 198, 255, 0.2);
 }
 
 .toggle-knob {
@@ -429,4 +497,55 @@ nav a:hover .nav-icon {
 
 .scroll-fade:hover {
   scrollbar-color: var(--color-border-default) transparent;
+}
+
+/* ══════════════════════════════════════════════
+   Material Symbols Definition
+   Ensures the correct ligatures are enabled
+   ══════════════════════════════════════════════ */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif !important;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Skeleton shimmer animation */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Sidebar floating bubble drift */
+@keyframes bubble-float {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translateY(-30px) translateX(10px) scale(1.1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-15px) translateX(-8px) scale(0.95);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translateY(-40px) translateX(5px) scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+.sidebar-bubble {
+  animation: bubble-float 20s ease-in-out infinite;
 }

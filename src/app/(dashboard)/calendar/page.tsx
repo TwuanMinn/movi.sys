@@ -1,267 +1,284 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { TextReveal } from "@/components/effects/text-reveal";
-import { Badge } from "@/components/ui/badge";
+import { useStudioStore } from "@/stores/studio-store";
+import { CALENDAR_EVENTS } from "@/lib/studio-data";
 
-/**
- * @frontend-specialist: Calendar page — horizontal timeline of movie milestones.
- * @product-manager: Shows all productions' key dates in one view.
- * Demo data used until DB connection is configured.
- */
-
-type MovieStatus = "development" | "pre_production" | "production" | "post_production";
-
-interface Milestone {
-  id: string;
-  label: string;
-  date: string; // ISO date
-  completed: boolean;
+function MI({ name, className = "", filled, style }: { name: string; className?: string; filled?: boolean; style?: React.CSSProperties }) {
+  return (
+    <span
+      className={`material-symbols-outlined ${className}`}
+      style={{ fontVariationSettings: `'FILL' ${filled ? 1 : 0}, 'wght' 400, 'GRAD' 0, 'opsz' 24`, ...style }}
+    >
+      {name}
+    </span>
+  );
 }
 
-interface ProductionRow {
-  id: string;
-  title: string;
-  status: MovieStatus;
-  color: string;
-  milestones: Milestone[];
-}
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-// Timeline spans Apr–Dec 2026
-const MONTHS = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const TIMELINE_START = new Date("2026-04-01").getTime();
-const TIMELINE_END = new Date("2026-12-31").getTime();
-const TIMELINE_RANGE = TIMELINE_END - TIMELINE_START;
+const EVENT_COLORS: Record<string, string> = {
+  deadline: "#D4534B",
+  launch: "#4b8eff",
+  meeting: "#D4903B",
+  event: "#8E5BB5",
+  campaign: "#2BA5A5",
+  release: "#82dab0",
+};
 
-function dateToPercent(dateStr: string): number {
-  const t = new Date(dateStr).getTime();
-  return Math.max(0, Math.min(100, ((t - TIMELINE_START) / TIMELINE_RANGE) * 100));
-}
-
-const PRODUCTIONS: ProductionRow[] = [
-  {
-    id: "1",
-    title: "Crimson Meridian",
-    status: "production",
-    color: "var(--color-accent-primary)",
-    milestones: [
-      { id: "m1", label: "Principal Photography", date: "2026-04-10", completed: true },
-      { id: "m2", label: "Picture Lock", date: "2026-06-20", completed: false },
-      { id: "m3", label: "VFX Delivery", date: "2026-08-01", completed: false },
-      { id: "m4", label: "Festival Premiere", date: "2026-10-15", completed: false },
-    ],
-  },
-  {
-    id: "2",
-    title: "The Last Observatory",
-    status: "post_production",
-    color: "var(--color-accent-green)",
-    milestones: [
-      { id: "m5", label: "Color Grade Complete", date: "2026-04-25", completed: true },
-      { id: "m6", label: "Sound Mix Final", date: "2026-05-18", completed: false },
-      { id: "m7", label: "DCP Delivery", date: "2026-06-30", completed: false },
-      { id: "m8", label: "Theatrical Release", date: "2026-07-24", completed: false },
-    ],
-  },
-  {
-    id: "3",
-    title: "Whispers at Dawn",
-    status: "pre_production",
-    color: "var(--color-accent-amber)",
-    milestones: [
-      { id: "m9", label: "Script Lock", date: "2026-05-05", completed: false },
-      { id: "m10", label: "Cast Announcements", date: "2026-06-10", completed: false },
-      { id: "m11", label: "Principal Photography", date: "2026-08-15", completed: false },
-      { id: "m12", label: "Wrap", date: "2026-11-01", completed: false },
-    ],
-  },
-  {
-    id: "4",
-    title: "Iron Cascade",
-    status: "development",
-    color: "var(--color-accent-blue)",
-    milestones: [
-      { id: "m13", label: "Greenlight", date: "2026-06-01", completed: false },
-      { id: "m14", label: "Director Attached", date: "2026-07-15", completed: false },
-      { id: "m15", label: "Pre-Production Start", date: "2026-09-01", completed: false },
-      { id: "m16", label: "Production Start", date: "2026-12-01", completed: false },
-    ],
-  },
+const SHOOT_SCENES = [
+  { time: "09:00 AM", type: "shooting", label: "Scene 14B: The Rooftop Chase", sub: "Unit A · Principal Photography · Terminal 4", accent: "var(--color-accent-blue)" },
+  { time: "02:30 PM", type: "scouting", label: "Abandoned Rail Yard Survey", sub: "Location Team · Ep. 4 Climax · Industrial District", accent: "#ffb595" },
+  { time: "05:00 PM", type: "meeting", label: "Dailies Review & Sign-off", sub: "Post-Production Suite · Edit Room 2", accent: "#8b90a0" },
 ];
 
-const TODAY_PERCENT = dateToPercent(new Date().toISOString().split("T")[0]!);
+function getCalendarDays(year: number, month: number) {
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startWeekday = (firstDay.getDay() + 6) % 7; // Mon=0
+  const daysInMonth = lastDay.getDate();
+  const prevMonthDays = new Date(year, month, 0).getDate();
+
+  const cells: { day: number; inMonth: boolean; date: Date }[] = [];
+  for (let i = startWeekday - 1; i >= 0; i--) {
+    const d = prevMonthDays - i;
+    cells.push({ day: d, inMonth: false, date: new Date(year, month - 1, d) });
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push({ day: d, inMonth: true, date: new Date(year, month, d) });
+  }
+  while (cells.length < 35) {
+    const d = cells.length - startWeekday - daysInMonth + 1;
+    cells.push({ day: d, inMonth: false, date: new Date(year, month + 1, d) });
+  }
+  return cells;
+}
+
+function fmtDate(d: Date) {
+  return d.toISOString().split("T")[0]!;
+}
+
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 export default function CalendarPage() {
+  const { movies } = useStudioStore();
+  const now = new Date();
+  const [year, setYear] = useState(now.getFullYear());
+  const [month, setMonth] = useState(now.getMonth());
+  const todayStr = fmtDate(now);
+
+  const cells = useMemo(() => getCalendarDays(year, month), [year, month]);
+
+  const eventsMap = useMemo(() => {
+    const map: Record<string, typeof CALENDAR_EVENTS> = {};
+    for (const ev of CALENDAR_EVENTS) {
+      (map[ev.date] ??= []).push(ev);
+    }
+    return map;
+  }, []);
+
+  const goMonth = (dir: number) => {
+    let m = month + dir;
+    let y = year;
+    if (m < 0) { m = 11; y--; }
+    if (m > 11) { m = 0; y++; }
+    setMonth(m);
+    setYear(y);
+  };
+
+  // Shoot progress mock
+  const completedScenes = 42;
+  const totalScenes = 65;
+  const shootPct = Math.round((completedScenes / totalScenes) * 100);
+
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-8">
-      {/* Header */}
-      <div className="mb-8">
-        <TextReveal
-          text="PRODUCTION TIMELINE"
-          className="font-[family-name:var(--font-display)] text-2xl sm:text-3xl lg:text-4xl font-bold tracking-widest text-[var(--color-text-primary)]"
-          as="h1"
-        />
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-2 text-[var(--color-text-secondary)]"
-        >
-          April — December 2026 · All active productions
-        </motion.p>
-      </div>
-
-      {/* Timeline container */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.35 }}
-        className="rounded-[var(--radius-md)] border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] overflow-x-auto"
-      >
-        {/* Month header */}
-        <div className="flex border-b border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] min-w-[640px]">
-          <div className="w-36 sm:w-44 lg:w-52 shrink-0 border-r border-[var(--color-border-subtle)] px-3 sm:px-4 py-3">
-            <span className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
-              Production
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8 grid grid-cols-1 xl:grid-cols-12 gap-8">
+      {/* ── Left: Calendar Grid ── */}
+      <section className="xl:col-span-8 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <motion.h1
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="font-[family-name:var(--font-display)] text-3xl lg:text-4xl font-extrabold tracking-tight text-[var(--color-text-primary)]"
+            >
+              Production Calendar
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="text-[var(--color-text-muted)] mt-1"
+            >
+              {MONTH_NAMES[month]} {year} · Project: {movies[0]?.title ?? "—"}
+            </motion.p>
+          </div>
+          <div className="flex items-center gap-1 bg-[var(--color-bg-elevated)] rounded-xl p-1">
+            <button onClick={() => goMonth(-1)} className="p-2 hover:bg-[var(--color-bg-surface)] rounded-lg transition-colors">
+              <MI name="chevron_left" className="text-[var(--color-text-secondary)]" />
+            </button>
+            <span className="px-4 font-[family-name:var(--font-display)] font-bold text-[var(--color-text-primary)]">
+              {MONTH_NAMES[month]?.slice(0, 3)}
             </span>
-          </div>
-          <div className="relative flex-1">
-            <div className="flex">
-              {MONTHS.map((m) => (
-                <div
-                  key={m}
-                  className="flex-1 border-r border-[var(--color-border-subtle)] px-2 py-3 last:border-r-0"
-                >
-                  <span className="text-xs font-medium text-[var(--color-text-muted)]">{m}</span>
-                </div>
-              ))}
-            </div>
+            <button onClick={() => goMonth(1)} className="p-2 hover:bg-[var(--color-bg-surface)] rounded-lg transition-colors">
+              <MI name="chevron_right" className="text-[var(--color-text-secondary)]" />
+            </button>
           </div>
         </div>
 
-        {/* Production rows */}
-        {PRODUCTIONS.map((prod, rowIdx) => (
-          <motion.div
-            key={prod.id}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: rowIdx * 0.08 + 0.5 }}
-            className="flex border-b border-[var(--color-border-subtle)] last:border-b-0 hover:bg-[var(--color-bg-elevated)] transition-colors duration-[var(--duration-fast)] min-w-[640px]"
-          >
-            {/* Title cell */}
-            <div className="w-36 sm:w-44 lg:w-52 shrink-0 border-r border-[var(--color-border-subtle)] px-3 sm:px-4 py-4">
-              <p className="text-sm font-semibold text-[var(--color-text-primary)] truncate" title={prod.title}>
-                {prod.title}
-              </p>
-              <div className="mt-1.5">
-                <Badge variant="status" status={prod.status}>
-                  {prod.status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                </Badge>
+        {/* Calendar Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="grid grid-cols-7 gap-px bg-[var(--color-border-default)]/10 rounded-2xl overflow-hidden shadow-2xl border border-[var(--color-border-default)]/20"
+        >
+          {/* Day Headers */}
+          {DAYS.map((d) => (
+            <div key={d} className="bg-[var(--color-bg-elevated)] p-3 text-center text-[10px] font-black uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+              {d}
+            </div>
+          ))}
+
+          {/* Day Cells */}
+          {cells.map((cell, i) => {
+            const dateStr = fmtDate(cell.date);
+            const isToday = dateStr === todayStr;
+            const dayEvents = eventsMap[dateStr] ?? [];
+            return (
+              <div
+                key={i}
+                className={`bg-[var(--color-bg-base)] p-2 min-h-[110px] relative group transition-colors hover:bg-[var(--color-bg-elevated)] ${
+                  !cell.inMonth ? "opacity-20" : "font-bold"
+                } ${isToday ? "!bg-[var(--color-accent-blue)]/5 ring-1 ring-inset ring-[var(--color-accent-blue)]/20" : ""}`}
+              >
+                <span className={`relative z-10 text-sm ${isToday ? "text-[var(--color-accent-blue)] font-black" : "text-[var(--color-text-primary)]"}`}>
+                  {cell.day}
+                </span>
+                {dayEvents.length > 0 && (
+                  <div className="mt-1.5 space-y-1">
+                    {dayEvents.slice(0, 2).map((ev, j) => (
+                      <div
+                        key={j}
+                        className="px-1.5 py-0.5 text-[9px] rounded font-bold uppercase tracking-wider flex items-center gap-1"
+                        style={{
+                          background: `${EVENT_COLORS[ev.type] ?? "#8b90a0"}15`,
+                          color: EVENT_COLORS[ev.type] ?? "#8b90a0",
+                          borderLeft: `2px solid ${EVENT_COLORS[ev.type] ?? "#8b90a0"}`,
+                        }}
+                      >
+                        <span
+                          className="w-1.5 h-1.5 rounded-full shrink-0"
+                          style={{ background: EVENT_COLORS[ev.type] ?? "#8b90a0" }}
+                        />
+                        <span className="truncate">{ev.type}</span>
+                      </div>
+                    ))}
+                    {dayEvents.length > 2 && (
+                      <span className="text-[8px] text-[var(--color-text-muted)] pl-1">+{dayEvents.length - 2} more</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </motion.div>
+      </section>
+
+      {/* ── Right: Sidebar ── */}
+      <aside className="xl:col-span-4 space-y-6">
+        {/* Shoot Progress Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="relative overflow-hidden bg-[var(--color-bg-surface)] p-6 rounded-2xl border border-[var(--color-border-default)]/30"
+        >
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-[family-name:var(--font-display)] font-bold text-lg text-[var(--color-text-primary)]">Shoot Progress</h3>
+              <span className="text-[var(--color-accent-blue)] font-black text-2xl">{shootPct}%</span>
+            </div>
+            <div className="w-full bg-[var(--color-bg-elevated)] h-3 rounded-full mb-5 overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${shootPct}%` }}
+                transition={{ duration: 1, delay: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                className="bg-gradient-to-r from-[var(--color-accent-blue)] to-[#4b8eff] h-full rounded-full"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] uppercase font-bold text-[var(--color-text-muted)] tracking-widest mb-1">Scenes Completed</p>
+                <p className="text-xl font-[family-name:var(--font-display)] font-bold text-[var(--color-text-primary)]">
+                  {completedScenes} <span className="text-sm text-[var(--color-text-muted)] font-normal">/ {totalScenes}</span>
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase font-bold text-[var(--color-text-muted)] tracking-widest mb-1">Days Remaining</p>
+                <p className="text-xl font-[family-name:var(--font-display)] font-bold text-[var(--color-text-primary)]">18</p>
               </div>
             </div>
+          </div>
+          {/* Background decoration */}
+          <div className="absolute -right-8 -bottom-8 opacity-[0.04]">
+            <MI name="movie" className="!text-[120px]" />
+          </div>
+        </motion.div>
 
-            {/* Timeline track */}
-            <div className="relative flex-1 py-4">
-              {/* Grid lines */}
-              <div className="absolute inset-0 flex pointer-events-none">
-                {MONTHS.map((m) => (
-                  <div
-                    key={m}
-                    className="flex-1 border-r border-[var(--color-border-subtle)] last:border-r-0"
-                  />
-                ))}
+        {/* Today's Agenda */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="space-y-3"
+        >
+          <h3 className="font-[family-name:var(--font-display)] font-bold text-xl text-[var(--color-text-primary)] px-1">Today&apos;s Agenda</h3>
+          {SHOOT_SCENES.map((scene, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: 8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 + i * 0.08 }}
+              className="p-4 bg-[var(--color-bg-elevated)] hover:bg-[var(--color-bg-surface)] transition-colors rounded-xl cursor-pointer group"
+              style={{ borderLeft: `4px solid ${scene.accent}` }}
+            >
+              <div className="flex justify-between items-start mb-1.5">
+                <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: scene.accent }}>
+                  {scene.time} · {scene.type}
+                </span>
+                <MI name="more_vert" className="text-sm text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
+              <h4 className="font-[family-name:var(--font-display)] font-bold text-[var(--color-text-primary)] mb-1">{scene.label}</h4>
+              <p className="text-xs text-[var(--color-text-muted)]">{scene.sub}</p>
+            </motion.div>
+          ))}
+        </motion.div>
 
-              {/* Today indicator */}
-              {TODAY_PERCENT > 0 && TODAY_PERCENT < 100 ? (
-                <div
-                  className="absolute top-0 bottom-0 w-px bg-[var(--color-accent-primary)]/40 z-10"
-                  style={{ left: `${TODAY_PERCENT}%` }}
-                />
-              ) : null}
-
-              {/* Span bar from first to last milestone */}
-              {(() => {
-                const dates = prod.milestones.map((m) => dateToPercent(m.date));
-                const minP = Math.min(...dates);
-                const maxP = Math.max(...dates);
-                return (
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 h-0.5 rounded-full opacity-30 z-0"
-                    style={{
-                      left: `${minP}%`,
-                      width: `${maxP - minP}%`,
-                      backgroundColor: prod.color,
-                    }}
-                  />
-                );
-              })()}
-
-              {/* Milestones */}
-              {prod.milestones.map((m, mIdx) => {
-                const pct = dateToPercent(m.date);
-                return (
-                  <motion.div
-                    key={m.id}
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: rowIdx * 0.08 + mIdx * 0.05 + 0.7, type: "spring", stiffness: 260, damping: 20 }}
-                    className="absolute top-1/2 -translate-y-1/2 group z-20"
-                    style={{ left: `${pct}%`, transform: `translateX(-50%) translateY(-50%)` }}
-                  >
-                    {/* Diamond marker */}
-                    <div
-                      className="h-3 w-3 rotate-45 border-2 transition-all duration-[var(--duration-fast)] group-hover:scale-150"
-                      style={{
-                        backgroundColor: m.completed ? prod.color : "transparent",
-                        borderColor: prod.color,
-                      }}
-                    />
-
-                    {/* Tooltip on hover */}
-                    <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-[var(--duration-fast)] z-30">
-                      <div className="rounded-[var(--radius-sm)] border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] px-3 py-2 shadow-[var(--shadow-md)] whitespace-nowrap">
-                        <p className="text-xs font-semibold text-[var(--color-text-primary)]">{m.label}</p>
-                        <p className="text-xs text-[var(--color-text-muted)]">{m.date}</p>
-                        {m.completed ? (
-                          <p className="text-xs text-[var(--color-accent-green)] mt-0.5">✓ Completed</p>
-                        ) : (
-                          <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Upcoming</p>
-                        )}
-                      </div>
-                      {/* Arrow */}
-                      <div className="absolute left-1/2 -translate-x-1/2 top-full w-2 h-1 overflow-hidden">
-                        <div className="h-2 w-2 rotate-45 -translate-y-1/2 border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] mx-auto" />
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* Legend */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.9 }}
-        className="mt-6 flex flex-wrap items-center gap-4 sm:gap-6"
-      >
-        <div className="flex items-center gap-2">
-          <div className="h-2.5 w-2.5 rotate-45 border-2 border-[var(--color-text-muted)] bg-[var(--color-text-muted)]" />
-          <span className="text-xs text-[var(--color-text-muted)]">Completed</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-2.5 w-2.5 rotate-45 border-2 border-[var(--color-text-muted)]" />
-          <span className="text-xs text-[var(--color-text-muted)]">Upcoming</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-px bg-[var(--color-accent-primary)]/60" />
-          <span className="text-xs text-[var(--color-text-muted)]">Today</span>
-        </div>
-      </motion.div>
+        {/* Upcoming Events */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55 }}
+          className="bg-gradient-to-br from-[var(--color-accent-blue)] to-[#3a6fcc] p-6 rounded-2xl text-white relative overflow-hidden"
+        >
+          <div className="relative z-10">
+            <MI name="auto_awesome" className="text-3xl mb-3 opacity-60" />
+            <h3 className="text-xl font-[family-name:var(--font-display)] font-bold leading-tight mb-2">
+              Timeline Optimization
+            </h3>
+            <p className="text-white/75 text-sm leading-relaxed">
+              Our engine suggests shifting principal photography by 4 days to avoid local equipment conflicts.
+            </p>
+            <button className="w-full mt-5 py-2.5 bg-white text-[var(--color-accent-blue)] font-[family-name:var(--font-display)] font-bold rounded-xl shadow-xl hover:bg-white/90 transition-colors text-sm">
+              Apply Smart Shift
+            </button>
+          </div>
+          <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-3xl" />
+        </motion.div>
+      </aside>
     </div>
   );
 }

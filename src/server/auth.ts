@@ -16,13 +16,35 @@ import { db } from "./db";
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
+    schema: {
+      user: {
+        modelName: "users"
+      },
+      session: {
+        modelName: "sessions"
+      },
+      account: {
+        modelName: "accounts"
+      },
+      verification: {
+        modelName: "verifications"
+      }
+    }
   }),
 
+  // Enable email provider as fallback when OAuth isn't configured
+  emailAndPassword: {
+    enabled: true,
+  },
+
   socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    },
+    // Only instantiate google if credentials exist, preventing startup crashes
+    ...(process.env.GOOGLE_CLIENT_ID ? {
+      google: {
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      },
+    } : {}),
   },
 
   session: {

@@ -36,7 +36,7 @@ describe("toast store", () => {
   });
 
   it("toast.success() shorthand works", () => {
-    toast.success("Upload complete", "Done");
+    toast.success("Upload complete", { title: "Done" });
     const t = useToastStore.getState().toasts[0];
     expect(t?.type).toBe("success");
     expect(t?.title).toBe("Done");

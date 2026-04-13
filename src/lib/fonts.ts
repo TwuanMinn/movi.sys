@@ -1,15 +1,15 @@
-import { Cormorant_Garamond, Outfit } from "next/font/google";
+import { Manrope, Inter } from "next/font/google";
 
-export const displayFont = Cormorant_Garamond({
+export const displayFont = Manrope({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["200", "400", "600", "700", "800"],
   variable: "--font-display",
   display: "swap",
 });
 
-export const bodyFont = Outfit({
+export const bodyFont = Inter({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600"],
   variable: "--font-body",
   display: "swap",
 });
